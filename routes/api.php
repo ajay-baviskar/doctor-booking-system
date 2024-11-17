@@ -12,17 +12,18 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 // Authenticated Routes
-Route::middleware(['auth.jwt'])->group(function () {
+Route::middleware(['jwt.handle'])->group(function () {
     // Patient Routes
-    Route::prefix('patient')->group(function () {
+    Route::prefix('patient')->middleware('check.role:Patient')->group(function () {
         Route::post('appointments', [PatientAppointmentController::class, 'create']);
         Route::put('appointments/{id}', [PatientAppointmentController::class, 'updateStatus']);
         Route::get('appointments', [PatientAppointmentController::class, 'index']);
     });
 
     // Doctor Routes
-    Route::prefix('doctor')->group(function () {
+    Route::prefix('doctor')->middleware('check.role:Doctor')->group(function () {
         Route::get('appointments', [DoctorAppointmentController::class, 'index']);
         Route::put('appointments/{id}', [DoctorAppointmentController::class, 'updateStatus']);
     });
 });
+
