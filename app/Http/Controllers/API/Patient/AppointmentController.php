@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Patient\CreateAppointmentRequest;
 use App\Http\Requests\Patient\UpdateAppointmentStatusRequest;
 use App\Models\Appointment;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class AppointmentController extends Controller
@@ -17,6 +19,14 @@ class AppointmentController extends Controller
         try {
             $data = $request->validated();
             $data['patient_id'] = auth()->id();
+            $doctor = User::where('id', $data['doctor_id'])->where('role', 'Doctor')->first();
+            if (!$doctor) {
+                return response()->json([
+                    'status' => false,
+                    'msg' => 'The selected doctor does not exist or is not a valid doctor.',
+                    'data' => null
+                ], Response::HTTP_NOT_FOUND);
+            }
 
             if (
                 Appointment::where('doctor_id', $data['doctor_id'])
